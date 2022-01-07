@@ -1,24 +1,23 @@
-// === Arduino UNO nRF24L01 Transmitter ===
-// (CE 8, CSN 10) MOSI 11, MISO 12, SCK 13
+// Arduino-4WD 送信機(コントローラー)
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 
+// 各種ピンの定数
 const int BUTTON_PIN = 2;
 
+// 通信に必要な定数
 const int CHANNEL = 74;
 const byte address[6] = "00001";
 
-int x;
-int y;
-int button;
-
+// 通信データ
 struct Data {
-  byte x;
-  byte y;
-  byte button;
+  int joystickX;
+  int joystickY;
+  boolean button;
 };
 
+// 通信用オブジェクト
 Data data;
 RF24 radio(8, 10);
 
@@ -34,15 +33,11 @@ void setup() {
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
-  x = map(analogRead(A1), 0, 1023, 0, 255);
-  y = map(analogRead(A0), 0, 1023, 0, 255);
-  button = !digitalRead(BUTTON_PIN);
-  data.x = x;
-  data.y = y;
-  data.button = button;
+  data.joystickX = analogRead(A1);
+  data.joystickY = analogRead(A0);
+  data.button = !digitalRead(BUTTON_PIN);
   radio.write(&data, sizeof(Data));
 }
